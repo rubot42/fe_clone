@@ -18,23 +18,23 @@ var effectCtx = unitCanvas.getContext("2d");
 
  */
 map1 = [
-    "_________________W__________",
-    "_________________B__________",
-    "_____________C___W____CCCC__",
-    "____________C____W__________",
-    "_______CCCCC_____WWWW_______",
+    "MMMMMMMf_________Rf____f____",
+    "MMMMMff__________B_f__HH____",
+    "MMMMMf_______C___R____CCCC__",
+    "f_f___fH____C____R__________",
+    "_______CCCCCf____RRRR_______",
     "____________________B_______",
-    "____________________W_______",
-    "____________________W__C____",
-    "____________________WCCWWWWC",
-    "__________________CCWWWWWWWW",
-    "__________________WWWWWWWWWW",
-    "C__________________WWWWWWWWW",
-    "WCC_______________WWWWWWWWWW",
-    "WWW___________CWWWWWWW_WWWWW",
-    "WWW___________WWWWWWW___WWW_",
+    "_____________f______R_______",
+    "_______f__ff____f___W__C____",
+    "______f_____________WCCWWWWC",
+    "__________f___ff__CCWWWWWWWW",
+    "________C_________WWWWWWWWWW",
+    "C___f___CC_________WWWWWWWWW",
+    "WCC_f_____C_______WWWWWWWWWW",
+    "WWWf__________CWWWWWWW_WWWWW",
+    "WWW___________WWWWWWW_F_WWWF",
     "WWWC_________CWWWWWWW___WWC_",
-    "WWWW________CWWWW__WWWWWWWW_"
+    "WWWW________CWWWWF_WWWWWWWW_"
     ];
 class Box{
     constructor(x,y,size, name, moveCost){
@@ -130,18 +130,46 @@ class Grid{
                 switch(this.getBoxAt(xi,yi).name){
                 case "_":
                     this.getBoxAt(xi,yi).name = "land";
+                    this.getBoxAt(xi,yi).moveCost = 1;
                     break;
                 case "W":
                     this.getBoxAt(xi,yi).name = "water";
+                    this.getBoxAt(xi,yi).moveCost = -1;
+                    break;
+                case "R":
+                    this.getBoxAt(xi,yi).name = "river";
                     break;
                 case "C":
                     this.getBoxAt(xi,yi).name = "cliff";
+                    this.getBoxAt(xi,yi).moveCost = -1;
+                    break;
+                case "M":
+                    this.getBoxAt(xi,yi).name = "mountain";
+                    this.getBoxAt(xi,yi).moveCost = 4;
                     break;
                 case "B":
                     this.getBoxAt(xi,yi).name = "bridge";
+                    this.getBoxAt(xi,yi).moveCost = 1;
+                    break;
+                case "f":
+                    this.getBoxAt(xi,yi).name = "forest";
+                    this.getBoxAt(xi,yi).moveCost = 2;
+                    break;
+                case "F":
+                    this.getBoxAt(xi,yi).name = "fort";
+                    this.getBoxAt(xi,yi).moveCost = 2;
+                    break;
+                case "H":
+                    this.getBoxAt(xi,yi).name = "house";
+                    this.getBoxAt(xi,yi).moveCost = 1;
+                    break;
+                case "=":
+                    this.getBoxAt(xi,yi).name = "wall";
+                    this.getBoxAt(xi,yi).moveCost = -1;
                     break;
                 default:
                     this.getBoxAt(xi,yi).name = "none";
+                    this.getBoxAt(xi,yi).moveCost = 1;
                 }
             }
         }
