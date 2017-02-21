@@ -10,8 +10,34 @@ var unitCtx = unitCanvas.getContext("2d");
 //effect layer
 var effectCanvas = document.getElementById("effectLayer");
 var effectCtx = unitCanvas.getContext("2d");
+/*
+ _ = plains
+ W = water
+ C = cliff
+ B = bridge
+
+ */
+map1 = [
+    "_________________W__________",
+    "_________________B__________",
+    "_____________C___W____CCCC__",
+    "____________C____W__________",
+    "_______CCCCC_____WWWW_______",
+    "____________________B_______",
+    "____________________W_______",
+    "____________________W__C____",
+    "____________________WCCWWWWC",
+    "__________________CCWWWWWWWW",
+    "__________________WWWWWWWWWW",
+    "C__________________WWWWWWWWW",
+    "WCC_______________WWWWWWWWWW",
+    "WWW___________CWWWWWWW_WWWWW",
+    "WWW___________WWWWWWW___WWW_",
+    "WWWC_________CWWWWWWW___WWC_",
+    "WWWW________CWWWW__WWWWWWWW_"
+    ];
 class Box{
-    constructor(x,y,size, desc, moveCost){
+    constructor(x,y,size, name, moveCost){
         this.x = x;
         this.y = y;
         this.top = x;
@@ -19,7 +45,7 @@ class Box{
         this.left = y;
         this.right = y+size;
         this.size = size;
-        this.desc = desc || "plains";
+        this.name = name || "none";
         this.moveCost = moveCost || 1;
         /*
         this.tl = [x,y];
@@ -32,7 +58,7 @@ class Box{
         this.occupiedBy = null;
     }
     toString(){
-        return this.desc + " " + this.moveCost;
+        return this.name + " " + this.moveCost;
     }
 }
 
@@ -94,6 +120,30 @@ class Grid{
         effectCtx.clearRect(0,0,effectCanvas.width,effectCanvas.height);
         if(this.inGrid(mouseX, mouseY)){
             this.changeColorAt(effectCtx, mouseX,mouseY,"rgba(255, 255, 255, 0.5)");
+        }
+    }
+
+    addDetail(aMap){
+        for(var yi = 0; yi < this.ySize; yi++){
+            for(var xi = 0; xi < this.xSize; xi++){
+                this.getBoxAt(xi,yi).name = aMap[yi][xi];
+                switch(this.getBoxAt(xi,yi).name){
+                case "_":
+                    this.getBoxAt(xi,yi).name = "land";
+                    break;
+                case "W":
+                    this.getBoxAt(xi,yi).name = "water";
+                    break;
+                case "C":
+                    this.getBoxAt(xi,yi).name = "cliff";
+                    break;
+                case "B":
+                    this.getBoxAt(xi,yi).name = "bridge";
+                    break;
+                default:
+                    this.getBoxAt(xi,yi).name = "none";
+                }
+            }
         }
     }
 }
@@ -188,7 +238,7 @@ window.addEventListener("mousemove",updateMousePosition);
 window.addEventListener("mousedown",getClick);
 //initializing a unit
 grid1 = new Grid(28,17,16); //a vital object in the code. grid1 is utilized in functions
-
+grid1.addDetail(map1);
 var info = "";
 var selection = null;
 unit1 = new Unit("friendly unit",grid1,"rgba(0,0,255,.7)",5,5,3);
@@ -248,7 +298,7 @@ function drawGame(){
         unitList[i].renderUnit(grid1);
     }
     for(var i = 0; i < moveGraph.length; i++){
-        grid1.changeColorAt(effectCtx,moveGraph[i][0],moveGraph[i][1],"rgba(0,0,0,.1)");
+        grid1.changeColorAt(effectCtx,moveGraph[i][0],moveGraph[i][1],"rgba(255,255,255,.5)");
     }
 
 }
