@@ -1,8 +1,15 @@
+<!doctype html>
 <html>
     <head>
-        <canvas id="myCanvas" width="512" height="512">canvas didn't load</canvas>
+        <meta charset="UTF-8">
+    </head>
     <body>
         <p id="info"></p>
-        <script src="game.js"></script></head>
+        <div style="position: relative;">
+            <canvas id="mapLayer" width="448" height="272" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+            <canvas id="unitLayer" width="448" height="272" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+            <canvas id="effectLayer" width="448" height="272" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+        </div>
+        <script src="game.js"></script>
     </body>
 </html>
