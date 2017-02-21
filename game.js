@@ -22,17 +22,17 @@ map1 = [
     "MMMMMff__________B_f__HH____",
     "MMMMMf_______C___R____CCCC__",
     "f_f___fH____C____R__________",
-    "_______CCCCCf____RRRR_______",
-    "____________________B_______",
-    "_____________f______R_______",
+    "===____CCCCCf____RRRR_______",
+    "===_________________B_______",
+    "=G=__________f______R_______",
     "_______f__ff____f___W__C____",
     "______f_____________WCCWWWWC",
     "__________f___ff__CCWWWWWWWW",
     "________C_________WWWWWWWWWW",
     "C___f___CC_________WWWWWWWWW",
-    "WCC_f_____C_______WWWWWWWWWW",
-    "WWWf__________CWWWWWWW_WWWWW",
-    "WWW___________WWWWWWW_F_WWWF",
+    "WCC_fvvv_HC_______WWWWWW__WW",
+    "WWWf_vvv___H__CWWWWWWW_WCCWW",
+    "WWW__vVv______WWWWWWW_F_WWWF",
     "WWWC_________CWWWWWWW___WWC_",
     "WWWW________CWWWWF_WWWWWWWW_"
     ];
@@ -67,19 +67,19 @@ class Grid{
         this.xSize = xSize;
         this.ySize = ySize;
         this.boxSize = boxSize;
-        this.boxList=[];
+        //this.boxList=[];
         this.boxArray = [];
-        this.moveCostArray=[];
+        //this.moveCostArray=[];
         for(var x = 0; x<xSize;x++){
             var row = [];
             var moveCostRow = [];
             for(var y = 0; y<ySize; y++){
-                this.boxList.push(new Box(x*boxSize,y*boxSize,boxSize));
+                //this.boxList.push(new Box(x*boxSize,y*boxSize,boxSize));
                 row.push(new Box(x*boxSize,y*boxSize,boxSize));
-                moveCostRow.push(1);
+                //moveCostRow.push(1);
             }
             this.boxArray.push(row);
-            this.moveCostArray.push(moveCostRow);
+            //this.moveCostArray.push(moveCostRow);
         }
     }
 
@@ -166,6 +166,22 @@ class Grid{
                 case "=":
                     this.getBoxAt(xi,yi).name = "wall";
                     this.getBoxAt(xi,yi).moveCost = -1;
+                    break;
+                case "|":
+                    this.getBoxAt(xi,yi).name = "fence";
+                    this.getBoxAt(xi,yi).moveCost = -1;
+                    break;
+                case "V":
+                    this.getBoxAt(xi,yi).name = "village gate";
+                    this.getBoxAt(xi,yi).moveCost = 1;
+                    break;
+                case "v":
+                    this.getBoxAt(xi,yi).name = "village";
+                    this.getBoxAt(xi,yi).moveCost = -1;
+                    break;
+                case "G":
+                    this.getBoxAt(xi,yi).name = "gate";
+                    this.getBoxAt(xi,yi).moveCost = 1;
                     break;
                 default:
                     this.getBoxAt(xi,yi).name = "none";
