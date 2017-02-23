@@ -10,6 +10,32 @@ var unitCtx = unitCanvas.getContext("2d");
 //effect layer
 var effectCanvas = document.getElementById("effectLayer");
 var effectCtx = unitCanvas.getContext("2d");
+
+Array.prototype.unique= function (){
+    return this.reduce(function(previous, current, index, array)
+                       {
+        previous[current.toString()+typeof(current)]=current;
+        return array.length-1 == index ? Object.keys(previous).reduce(function(prev,cur)
+                                                                      {
+            prev.push(previous[cur]);
+            return prev;
+        },[]) : previous;
+    }, {});
+};
+
+function coordArrayEqual(a1,a2){
+    if(a1.length == a2.length){
+        for(var i = 0; i < a1.length; i++){
+            if(a1[i] != a2[i]){
+                return false;
+            }
+        }
+    }else{
+        return false;
+    }
+    return true;
+}
+
 /*
  _ = plains
  W = water
@@ -24,7 +50,7 @@ map1 = [
     "f_f___fH____C____R__________",
     "===____CCCCCf____RRRR_______",
     "===_________________B_______",
-    "=G=__________f______R_______",
+    "=G=__________f______R_______", 
     "_______f__ff____f___W__C____",
     "______f_____________WCCWWWWC",
     "__________f___ff__CCWWWWWWWW",
@@ -138,6 +164,7 @@ class Grid{
                     break;
                 case "R":
                     this.getBoxAt(xi,yi).name = "river";
+                    this.getBoxAt(xi,yi).moveCost = -1;
                     break;
                 case "C":
                     this.getBoxAt(xi,yi).name = "cliff";
@@ -250,6 +277,7 @@ class Unit{
         var checkList = [];
         var checkDict = {};
         var checked = [];
+        var initialCost = grid.getBoxAt(this.x,this.y).moveCost;
         //first position is starting position of unit
         checkList.push([this.x,this.y,0]);
 
@@ -257,17 +285,14 @@ class Unit{
             var aX = checkList[0][0];
             var aY = checkList[0][1];
             var aM = checkList[0][2];
-            if((grid.getBoxAt(aX,aY).moveCost === -1)||(aM > this.mov*2)){
+            if((grid.getBoxAt(aX,aY).moveCost === -1)||(aM > (this.mov*2)+initialCost)){
                 checkList = checkList.slice(1,checkList.length);
                 continue;
             }
             checkDict[[aX,aY]]=aM+grid.getBoxAt(aX,aY).moveCost;
-            if(!([aX,aY] in checked)){
-                checked.push([aX,aY]);
-            }
+            checked.push([aX,aY]);
             var afterMove = checkDict[[aX,aY]];
             var nextList = [[aX+1, aY],[aX-1, aY],[aX, aY+1],[aX, aY-1]];
-            //console.log(nextList);//testing
             for(var i = 0; i < nextList.length; i++){
                 var bX = nextList[i][0];
                 var bY = nextList[i][1];
@@ -284,11 +309,7 @@ class Unit{
                 }
                 if(free){
                     newMove = afterMove + grid.getBoxAt(bX,bY).moveCost;
-              /*      console.log(afterMove);
-                    console.log("new");
-                    console.log(newMove);*/
-                    free = (newMove > afterMove) && (newMove <= this.mov*2) && (newMove > 0) ;
-                    //free = free && ([bX,bY in checkDict]);
+                    free = (newMove > afterMove) && (newMove <= (this.mov*2)+initialCost) && (newMove > 0) ;
                     if([bX,bY] in checkDict){
                         free = free && (newMove < checkDict[[bX,bY]]);
                     }
@@ -297,14 +318,16 @@ class Unit{
                 }
                 if(free){
                     checkList.push([bX,bY,newMove]);
-                    if(!([bX,bY] in checked)){
-                        checked.push([bX,bY]);
-                    }
-                    //console.log(checkList[checkList.length-1]);
+                    checked.push([bX,bY]);
                 }
             }
             checkList = checkList.slice(1,checkList.length);
-            //console.log(checkList.length);
+        }
+        checked = checked.unique();
+        for(var u = 0; u < checked.length; u++){
+            if(coordArrayEqual(checked[u],[this.x,this.y])){
+                checked.splice(u,1);
+            }
         }
         return checked;
     }
@@ -351,7 +374,7 @@ var info = "";
 var selection = null;
 unit1 = new Unit("friendly unit",grid1,"rgba(0,0,255,.7)",5,5,8,1);
 unit2 = new Unit("enemy unit",grid1,"rgba(255, 0, 0, .7)",7,10,5,2);
-unit3 = new Unit("neutral unit",grid1,"rgba(0, 255, 0 ,.7)", 11, 5,4,1);
+unit3 = new Unit("neutral unit",grid1,"rgba(0, 255, 0 ,.7)", 11, 5,2,1);
 var moveGraph = [];
 function inMoveGraph(x,y){
     var outcome = false;
@@ -406,14 +429,8 @@ function drawGame(){
     for(var i = 0; i < unitList.length; i++){
         unitList[i].renderUnit(grid1);
     }
-    var moveSelected = [];
     for(var z = 0; z < moveGraph.length; z++){
-        if(moveGraph[z] in moveSelected){
-        }
-        else{
-            moveSelected.push(moveGraph[z]);
             grid1.changeColorAt(effectCtx,moveGraph[z][0],moveGraph[z][1],"rgba(255,255,255,.5)");
-        }
     }
 
 }
