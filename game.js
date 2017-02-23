@@ -257,7 +257,7 @@ class Unit{
             var aX = checkList[0][0];
             var aY = checkList[0][1];
             var aM = checkList[0][2];
-            if((grid.getBoxAt(aX,aY).moveCost === -1)||(aM > this.mov)){
+            if((grid.getBoxAt(aX,aY).moveCost === -1)||(aM > this.mov*2)){
                 checkList = checkList.slice(1,checkList.length);
                 continue;
             }
@@ -267,11 +267,6 @@ class Unit{
             }
             var afterMove = checkDict[[aX,aY]];
             var nextList = [[aX+1, aY],[aX-1, aY],[aX, aY+1],[aX, aY-1]];
-            /*for(var n = 0; n < nextList.length; n++){
-                if(nextList[n] in checked){
-                    nextList.splice(n,1);
-                }
-            }*/
             //console.log(nextList);//testing
             for(var i = 0; i < nextList.length; i++){
                 var bX = nextList[i][0];
@@ -292,7 +287,7 @@ class Unit{
               /*      console.log(afterMove);
                     console.log("new");
                     console.log(newMove);*/
-                    free = (newMove > afterMove) && (newMove <= this.mov) && (newMove > 0) ;
+                    free = (newMove > afterMove) && (newMove <= this.mov*2) && (newMove > 0) ;
                     //free = free && ([bX,bY in checkDict]);
                     if([bX,bY] in checkDict){
                         free = free && (newMove < checkDict[[bX,bY]]);
