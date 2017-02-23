@@ -18,9 +18,9 @@ var effectCtx = unitCanvas.getContext("2d");
 
  */
 map1 = [
-    "MMMMMMMf_________Rf____f____",
-    "MMMMMff__________B_f__HH____",
-    "MMMMMf_______C___R____CCCC__",
+    "MMMMMMMfvvv______Rf____f____",
+    "MMMMMff_vvv______B_f__HH____",
+    "MMMMMf__vVv__C___R____CCCC__",
     "f_f___fH____C____R__________",
     "===____CCCCCf____RRRR_______",
     "===_________________B_______",
@@ -28,7 +28,7 @@ map1 = [
     "_______f__ff____f___W__C____",
     "______f_____________WCCWWWWC",
     "__________f___ff__CCWWWWWWWW",
-    "________C_________WWWWWWWWWW",
+    "________C___f______WWWWWWWWW",
     "C___f___CC_________WWWWWWWWW",
     "WCC_fvvv_HC_______WWWWWW__WW",
     "WWWf_vvv___H__CWWWWWWW_WCCWW",
@@ -194,13 +194,14 @@ class Grid{
 
 unitList = [];
 class Unit{
-    constructor(name,aGrid,color, x, y, mov){
+    constructor(name,aGrid,color, x, y, mov, team){
         this.name = name;
         this.x = x;
         this.y = y;
         this.color = color;
         this.visible = true;
         this.mov = 0 || mov;
+        this.team = team;
         aGrid.getBoxAt(x,y).occupied = true;
         aGrid.getBoxAt(x,y).occupiedBy = this;
         unitList.push(this);
@@ -243,8 +244,76 @@ class Unit{
         }
         return graph;
     }
-}
 
+    //currently working on
+    advancedMoveGrid(grid){
+        var checkList = [];
+        var checkDict = {};
+        var checked = [];
+        //first position is starting position of unit
+        checkList.push([this.x,this.y,0]);
+
+        while(checkList.length > 0){
+            var aX = checkList[0][0];
+            var aY = checkList[0][1];
+            var aM = checkList[0][2];
+            if((grid.getBoxAt(aX,aY).moveCost === -1)||(aM > this.mov)){
+                checkList = checkList.slice(1,checkList.length);
+                continue;
+            }
+            checkDict[[aX,aY]]=aM+grid.getBoxAt(aX,aY).moveCost;
+            if(!([aX,aY] in checked)){
+                checked.push([aX,aY]);
+            }
+            var afterMove = checkDict[[aX,aY]];
+            var nextList = [[aX+1, aY],[aX-1, aY],[aX, aY+1],[aX, aY-1]];
+            /*for(var n = 0; n < nextList.length; n++){
+                if(nextList[n] in checked){
+                    nextList.splice(n,1);
+                }
+            }*/
+            //console.log(nextList);//testing
+            for(var i = 0; i < nextList.length; i++){
+                var bX = nextList[i][0];
+                var bY = nextList[i][1];
+                var free = true;
+                var newMove = 0;
+                if(grid.inGrid(bX,bY)){
+                    if(grid.getBoxAt(bX,bY).occupied){
+                        free = grid.getBoxAt(bX,bY).occupiedBy.team == this.team;
+                        free = free && (grid.getBoxAt(bX,bY).occupiedBy != this);
+                    }
+                }
+                else{
+                    free = false;
+                }
+                if(free){
+                    newMove = afterMove + grid.getBoxAt(bX,bY).moveCost;
+              /*      console.log(afterMove);
+                    console.log("new");
+                    console.log(newMove);*/
+                    free = (newMove > afterMove) && (newMove <= this.mov) && (newMove > 0) ;
+                    //free = free && ([bX,bY in checkDict]);
+                    if([bX,bY] in checkDict){
+                        free = free && (newMove < checkDict[[bX,bY]]);
+                    }
+                }
+                else{
+                }
+                if(free){
+                    checkList.push([bX,bY,newMove]);
+                    if(!([bX,bY] in checked)){
+                        checked.push([bX,bY]);
+                    }
+                    //console.log(checkList[checkList.length-1]);
+                }
+            }
+            checkList = checkList.slice(1,checkList.length);
+            //console.log(checkList.length);
+        }
+        return checked;
+    }
+}
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
@@ -285,9 +354,9 @@ grid1 = new Grid(28,17,16); //a vital object in the code. grid1 is utilized in f
 grid1.addDetail(map1);
 var info = "";
 var selection = null;
-unit1 = new Unit("friendly unit",grid1,"rgba(0,0,255,.7)",5,5,3);
-unit2 = new Unit("enemy unit",grid1,"rgba(255, 0, 0, .7)",7,10,2);
-unit3 = new Unit("neutral unit",grid1,"rgba(0, 255, 0 ,.7)", 11, 3,1);
+unit1 = new Unit("friendly unit",grid1,"rgba(0,0,255,.7)",5,5,8,1);
+unit2 = new Unit("enemy unit",grid1,"rgba(255, 0, 0, .7)",7,10,5,2);
+unit3 = new Unit("neutral unit",grid1,"rgba(0, 255, 0 ,.7)", 11, 5,4,1);
 var moveGraph = [];
 function inMoveGraph(x,y){
     var outcome = false;
@@ -303,7 +372,8 @@ function updateGame(){
         if(selection === null){
             selection = grid1.getBoxAt(clickX,clickY).occupiedBy;
             if(selection !== null){
-                moveGraph = selection.potentialMoveGrid(selection.mov,grid1);
+                // moveGraph = selection.potentialMoveGrid(selection.mov,grid1);
+                moveGraph = selection.advancedMoveGrid(grid1);
             }
             clickX = -1;
             clickY = -1;
@@ -341,8 +411,14 @@ function drawGame(){
     for(var i = 0; i < unitList.length; i++){
         unitList[i].renderUnit(grid1);
     }
-    for(var i = 0; i < moveGraph.length; i++){
-        grid1.changeColorAt(effectCtx,moveGraph[i][0],moveGraph[i][1],"rgba(255,255,255,.5)");
+    var moveSelected = [];
+    for(var z = 0; z < moveGraph.length; z++){
+        if(moveGraph[z] in moveSelected){
+        }
+        else{
+            moveSelected.push(moveGraph[z]);
+            grid1.changeColorAt(effectCtx,moveGraph[z][0],moveGraph[z][1],"rgba(255,255,255,.5)");
+        }
     }
 
 }
