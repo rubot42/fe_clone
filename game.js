@@ -301,7 +301,6 @@ class Unit{
                 if(grid.inGrid(bX,bY)){
                     if(grid.getBoxAt(bX,bY).occupied){
                         free = grid.getBoxAt(bX,bY).occupiedBy.team == this.team;
-                        free = free && (grid.getBoxAt(bX,bY).occupiedBy != this);
                     }
                 }
                 else{
@@ -373,7 +372,7 @@ grid1.addDetail(map1);
 var info = "";
 var selection = null;
 unit1 = new Unit("friendly unit",grid1,"rgba(0,0,255,.7)",5,5,8,1);
-unit2 = new Unit("enemy unit",grid1,"rgba(255, 0, 0, .7)",7,10,5,2);
+unit2 = new Unit("enemy unit",grid1,"rgba(255, 0, 0, .7)",7,10,4,2);
 unit3 = new Unit("neutral unit",grid1,"rgba(0, 255, 0 ,.7)", 11, 5,2,1);
 var moveGraph = [];
 function inMoveGraph(x,y){
